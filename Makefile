@@ -15,5 +15,12 @@ docker_run:
 	--platform=linux/arm/v7 \
 	--env WB_RULES_MODULES=/etc/wb-rules-modules \
 	--rm \
-	-it \
 	wb-rules-armhf
+
+debug: docker_build
+	docker run \
+	--platform=linux/arm/v7 \
+	--env WB_RULES_MODULES=/etc/wb-rules-modules \
+	--rm \
+	-it \
+	wb-rules-armhf /bin/bash
