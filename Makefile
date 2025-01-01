@@ -5,6 +5,7 @@ all: docker_build docker_run
 
 docker_build:
 	docker build \
+	--progress plain \
 	--platform=linux/arm/v7 \
 	-t wb-rules-armhf \
 	.

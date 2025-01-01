@@ -26,17 +26,17 @@ terminate_command() {
 while kill -0 $COMMAND_PID 2>/dev/null; do
     # Проверяем вывод команды в реальном времени
     if IFS= read -r -t 1 line <&3; then
-        echo "$line"  # Вывод строки на консоль
+        echo "$line" # Вывод строки на консоль
 
-        # Проверка строки "ERROR:" или "FAIL:"
-        if [[ "$line" == *"FAIL:"* ]]; then
+        # Проверка строки
+        if [[ "$line" == *"FAIL:"* || "$line" == *"couldn't load"* ]]; then
             echo -e "\033[31mTesting FAILED: $line\033[0m"  # Красное сообщение с причиной
             terminate_command
             exit 1
         fi
 
-        # Проверка строки "Testing ended"
-        if [[ "$line" == *"Testing ended"* ]]; then
+        # Проверка строки "all rule files are loaded"
+        if [[ "$line" == *"all rule files are loaded"* ]]; then
             echo -e "\033[32mTesting SUCCESSFUL COMPLETED\033[0m"  # Зеленое сообщение
             terminate_command
             exit 0
@@ -53,6 +53,6 @@ while kill -0 $COMMAND_PID 2>/dev/null; do
 done
 
 # Если команда завершилась без вывода нужных строк
-echo -e "\033[31mTesting FAILED: Command completed without 'Testing ended'\033[0m"
+echo -e "\033[31mTesting FAILED: Command completed without 'all rule files are loaded'\033[0m"
 terminate_command
 exit 1

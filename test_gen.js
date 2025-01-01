@@ -65,9 +65,9 @@ function deepEqual(actual, expected) {
 
 function assertEqual(actual, expected, testName) {
     if (deepEqual(actual, expected)) {
-        log("PASS: " + testName);
+        log.info("PASS: {} in {}", testName, "${relativePath}");
     } else {
-        error("FAIL: " + testName + " => actual: " + JSON.stringify(actual) + ", expected: " + JSON.stringify(expected));
+        log.error("FAIL: {} actual: {} expected: {} in {}", arg, JSON.stringify(actual), JSON.stringify(expected),"${relativePath}")
     }
 }
 `;
@@ -91,8 +91,13 @@ function assertEqual(actual, expected, testName) {
     return `
 ${helpers}
 
+log.info("Start testing ${relativePath} in file", module.filename)
+
 // Import the module and expose all exports globally
-Object.assign(global, require("${relativePath}"));
+var requiredModule = require("${relativePath}");
+Object.keys(requiredModule).forEach(function (key) {
+    global[key] = requiredModule[key];
+});
 
 // Generated tests
 ${tests}
@@ -106,7 +111,7 @@ function processFiles(inputDir, outputDir) {
     const files = findFiles(inputDir, '.js');
     console.log(`Found ${files.length} JavaScript files in ${inputDir}.`);
     files.forEach(function (file) {
-        const relativePath = './' + path.relative(inputDir, file).replace(/\\/g, '/');
+        const relativePath = path.relative(inputDir, file).replace('.js', '');
         const fileName = path.basename(file, '.js');
         const examples = extractExamplesFromFile(file);
         if (examples.length > 0) {

@@ -1,3 +1,19 @@
+# Stage 1: Node.js environment for ARM-compatible JavaScript test generation
+FROM --platform=linux/arm/v7 node:18 as jsdoc-stage
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Устанавливаем зависимости (если нужны)
+RUN npm install doctrine
+
+# Копируем необходимые файлы
+COPY src /app/src
+COPY test_gen.js /app/test_gen.js
+
+# Выполняем JavaScript-скрипт для генерации и запуска тестов
+RUN node test_gen.js
+
 # Используем базовый образ
 FROM debian:11
 
@@ -37,13 +53,15 @@ RUN chmod -R 777 /var/log/mosquitto /var/lib/mosquitto /var/lib/wirenboard/
 COPY test.sh /etc/wb-rules/test.sh
 RUN chmod +x /etc/wb-rules/test.sh
 
-COPY wb-rules-test.js /etc/wb-rules/wb-rules-test.js
+# Копируем сгенерированные тесты из первого стейджа
+COPY --from=jsdoc-stage /app/generated-tests /etc/wb-rules
 
 COPY src /etc/wb-rules-modules
-COPY tests /etc/tests
 
 WORKDIR /etc/wb-rules/
 
 # Команда запуска MQTT-брокера и wb-rules
-CMD mosquitto -c /etc/mosquitto/mosquitto.conf & /etc/wb-rules/test.sh
-#CMD bash
+CMD mosquitto -c /etc/mosquitto/mosquitto.conf & sleep 5 & /etc/wb-rules/test.sh
+
+# Раскомментировать для отладки
+# CMD mosquitto -c /etc/mosquitto/mosquitto.conf & bash
