@@ -73,7 +73,7 @@ function assertEqual(actual, expected, testName) {
 global.assertEqual = assertEqual;
 `;
 
-    const tests = examples.map((example, index) => {
+    var tests = examples.map((example, index) => {
         // Разбиваем строку по "//" для отделения кода от ожидаемого значения
         const parts = example.split('//');
         if (parts.length !== 2) {
@@ -89,10 +89,11 @@ global.assertEqual = assertEqual;
     `;
     }).join('\n');
 
+    if (tests.length > 0) {
+        tests = `log.info("Start JsDoc testing ${relativePath} in file", module.filename)\n` + tests;
+    }
     return `
 ${helpers}
-
-log.info("Start testing ${relativePath} in file", module.filename)
 
 // Import the module and expose all exports globally
 var requiredModule = require("${relativePath}");
@@ -100,7 +101,9 @@ var requiredModule = require("${relativePath}");
 // Run tests if exists
 
 if (requiredModule["tests"]){
+    log("Starts tests function in {}", "${relativePath}")
     requiredModule.tests()
+    log("PASS: function tests in {}", "${relativePath}")
 }
 
 Object.keys(requiredModule).forEach(function (key) {
@@ -122,10 +125,10 @@ function processFiles(inputDir, outputDir) {
         const relativePath = path.relative(inputDir, file).replace('.js', '');
         const fileName = path.basename(file, '.js');
         const examples = extractExamplesFromFile(file);
+        const generatedCode = generateExecutableJS(relativePath, examples);
+        const outputFilePath = path.join(outputDir, fileName + '-tests.js');
+        fs.writeFileSync(outputFilePath, generatedCode);
         if (examples.length > 0) {
-            const generatedCode = generateExecutableJS(relativePath, examples);
-            const outputFilePath = path.join(outputDir, fileName + '-tests.js');
-            fs.writeFileSync(outputFilePath, generatedCode);
             console.log('Generated tests for ' + file + ' -> ' + outputFilePath);
         } else {
             console.log('No @example tags found in ' + file + '.');
