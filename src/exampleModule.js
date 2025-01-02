@@ -31,10 +31,20 @@ function add(a, b) {
  * @example
  * -1 * multiply(10, -5) // 50
  */
-function multiply (a, b) {
+function multiply(a, b) {
     return a * b;
 };
+
+function tests() {
+
+    if (add(2, 3) !== 5) {
+        throw Error("Test error")
+    }
+
+    assertEqual(multiply(5,3), 15, "MulTest")
+}
 
 // Экспортируем функции через объект export
 exports.add = add;
 exports.multiply = multiply;
+exports.tests = tests;

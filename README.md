@@ -53,7 +53,9 @@ function add(a, b) {
 exports.add = add;
 ```
 
-И вы хотите протестировать его. Для этого перед функцией нужно добавить комментарий
+И вы хотите протестировать его.
+### Использование JsDoc
+Для этого перед функцией нужно добавить комментарий
 в формате JSDoc с `@example` примерами вызова функции, например так:
 
 ```javascript
@@ -69,6 +71,26 @@ function add(a, b) {
 }
 
 exports.add = add;
+```
+### Функция tests
+
+Если примеры сложные для описыния в JsDoc
+то можно описать функцию `tests` без аргументов и эспортировать её.
+Эту функцию позовёт фреймворк и если в процессе не будет брошени исключений то тесты завершатся успешно.
+
+```javascript
+// exampleModule.js
+function add(a, b) {
+    return a + b;
+}
+
+function tests(){
+   if (add(2, 3) <> 5){
+      throw Error("Test error")
+   }
+}
+exports.add = add;
+exports.tests = tests;
 ```
 
 Теперь выполните тесты:
@@ -87,6 +109,8 @@ INFO:  [rule info] PASS: Test 3 in exampleModule
 INFO:  [rule info] PASS: Test 4 in exampleModule
 INFO:  all rule files are loaded
 ```
+
+Примеры [в специальном модуле](./src/exampleModule.js)
 
 ---
 

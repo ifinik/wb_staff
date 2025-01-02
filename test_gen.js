@@ -67,9 +67,10 @@ function assertEqual(actual, expected, testName) {
     if (deepEqual(actual, expected)) {
         log.info("PASS: {} in {}", testName, "${relativePath}");
     } else {
-        log.error("FAIL: {} actual: {} expected: {} in {}", arg, JSON.stringify(actual), JSON.stringify(expected),"${relativePath}")
+        log.error("FAIL: {} actual: {} expected: {} in {}", testName, JSON.stringify(actual), JSON.stringify(expected),"${relativePath}")
     }
 }
+global.assertEqual = assertEqual;
 `;
 
     const tests = examples.map((example, index) => {
@@ -95,6 +96,13 @@ log.info("Start testing ${relativePath} in file", module.filename)
 
 // Import the module and expose all exports globally
 var requiredModule = require("${relativePath}");
+
+// Run tests if exists
+
+if (requiredModule["tests"]){
+    requiredModule.tests()
+}
+
 Object.keys(requiredModule).forEach(function (key) {
     global[key] = requiredModule[key];
 });
