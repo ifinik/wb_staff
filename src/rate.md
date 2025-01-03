@@ -18,25 +18,29 @@ var rcm = require("rate");
 ### Создание нового объекта RateCalculator
 
 ```js
-const rateCalc = new rcm.RateCalculator({
-  inputTopic: "sensor/counter", // Входной топик
-  stopTopic: "sensor/stop", // Топик для остановки
-  deviceName: "rateCalculatorDevice", // Имя виртуального устройства
-  deviceTitle: "Rate Calculator Device", // Заголовок виртуального устройства
+var rcm = require("rate");
+
+var rateCalc = new rcm.RateCalculator({
+  inputTopic: "wb-ms_146/Input 2 Counter",
+  stopTopic: "wbe2-i-opentherm_11/Boiler Flame Status",
+  deviceName: "GasRate",
+  deviceTitle: "Текущее потребелени газа",
   outputTopic: {
     rate: {
       type: "value",
       value: 0,
-      precision: 3
+      precision: 3,
+      unit: "m^3/h",
+      title: "За 10 минут"
     }
-  }, // Топики для результата
-  bufferSize: 300, // Окно расчёта (по умолчанию 300 секунд)
-  timeout: 600, // Таймаут ожидания (по умолчанию 2 * bufferSize)
+  },
+  bufferSize: 600, // 10 минут
+  multiplier: 0.006, // 100 импульсов на куб и 6 десятиминуток в часе
   stopCondition: function(newValue) {
-    return newValue === "stop"; // Событие остановки
+    return newValue === 0; // Горелка погасла
   }
 });
-
+```
 ## Лицензия
 
 Этот модуль предоставляется "как есть". Автор не несёт ответственности за возможный ущерб, вызванный использованием модуля.

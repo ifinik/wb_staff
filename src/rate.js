@@ -100,6 +100,7 @@ function RateCalculator(config) {
     // Настройки модуля
     var bufferSize = config.bufferSize || 300;
     var timeout = config.timeout || 2 * bufferSize;
+    var multiplier = config.multiplier || 1;
     var inputTopic = config.inputTopic;
     var stopTopic = config.stopTopic;
     var stopCondition = config.stopCondition;
@@ -122,7 +123,7 @@ function RateCalculator(config) {
      */
     function updateRate() {
         var rate = calculateRate(buffer);
-        dev[topic] = rate * bufferSize;
+        dev[topic] = rate * bufferSize * multiplier;
     }
 
     // Правило обработки данных из inputTopic
@@ -162,7 +163,28 @@ function RateCalculator(config) {
     });
 };
 
-// Экспортируем функции для тестирования
+function tests() {
+    var rateCalc = new RateCalculator({
+        inputTopic: "sensor/counter", // Входной топик
+        stopTopic: "sensor/stop", // Топик для остановки
+        deviceName: "testRateCalculatorDevice", // Имя виртуального устройства
+        deviceTitle: "Rate Calculator Device", // Заголовок виртуального устройства
+        outputTopic: {
+            rate: {
+                type: "value",
+                value: 0,
+                precision: 3
+            }
+        }, // Топики для результата
+        bufferSize: 300, // Окно расчёта (по умолчанию 300 секунд)
+        multiplier: 1, // Множитель для значения (по умолчанию 1)
+        timeout: 600, // Таймаут ожидания (по умолчанию 2 * bufferSize)
+        stopCondition: function (newValue) {
+            return newValue === "stop"; // Событие остановки
+        }
+    });
+}
+exports.tests = tests
 exports.addToBuffer = addToBuffer;
 exports.calculateRate = calculateRate;
 exports.resetTimer = resetTimer;
